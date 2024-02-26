@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Test\Controller;
+namespace App\Tests\Controller;
 
 use App\Entity\User;
 use App\Repository\UserRepository;
@@ -41,16 +41,17 @@ class UserControllerTest extends WebTestCase
     {
         $originalNumObjectsInRepository = count($this->repository->findAll());
 
-        $this->markTestIncomplete();
+        //$this->markTestIncomplete();
         $this->client->request('GET', sprintf('%screate', $this->path));
 
         self::assertResponseStatusCodeSame(200);
 
-        $this->client->submitForm('user[save]', [
-            'user[username]' => 'Testing',
-            'user[password]' => 'Testing',
-            'user[email]' => 'Testing',
-            'user[roles]' => 'Testing',
+        $this->client->submitForm('Save', [
+            'user[username]' => 'Testing', 
+            'user[password][first]' => 'Testing', 
+            'user[password][second]' => 'Testing', 
+            'user[email]' => 'test@mail.fr', 
+            'user[roles]' => ['ROLE_USER'],
         ]);
 
         self::assertResponseRedirects('/users/');
@@ -80,33 +81,34 @@ class UserControllerTest extends WebTestCase
 
     public function testEdit(): void
     {
-        $this->markTestIncomplete();
+        //$this->markTestIncomplete();
         $fixture = new User();
-        $fixture->setUsername('My Title');
-        $fixture->setPassword('My Title');
-        $fixture->setEmail('My Title');
-        $fixture->setRoles('My Title');
+        $fixture->setUsername('User');
+        $fixture->setPassword('user');
+        $fixture->setEmail('email@email.fr');
+        $fixture->setRoles(['ROLE_USER']); 
 
         $this->manager->persist($fixture);
         $this->manager->flush();
 
         $this->client->request('GET', sprintf('%s%s/edit', $this->path, $fixture->getId()));
 
-        $this->client->submitForm('user[save]', [
+        $this->client->submitForm('Modifier', [
             'user[username]' => 'Something New',
-            'user[password]' => 'Something New',
-            'user[email]' => 'Something New',
-            'user[roles]' => 'Something New',
+            'user[password][first]' => 'Something New', 
+            'user[password][second]' => 'Something New', 
+            'user[email]' => 'newmail@email.fr',
+            'user[roles]' => ['ROLE_USER'], 
         ]);
 
         self::assertResponseRedirects('/users/');
 
-        $fixture = $this->repository->findAll();
+        $updatedUser = $this->repository->find($fixture->getId());
 
-        self::assertSame('Something New', $fixture[0]->getUsername());
-        self::assertSame('Something New', $fixture[0]->getPassword());
-        self::assertSame('Something New', $fixture[0]->getEmail());
-        self::assertSame('Something New', $fixture[0]->getRoles());
+        self::assertSame('Something New', $updatedUser->getUsername());
+        self::assertSame('Something New', $updatedUser->getPassword());
+        self::assertSame('newmail@email.fr', $updatedUser->getEmail());
+        self::assertSame(['ROLE_USER'], $updatedUser->getRoles()); 
     }
 
     /*public function testRemove(): void
