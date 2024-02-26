@@ -1,12 +1,13 @@
 <?php
 
-namespace App\Test\Controller;
+namespace App\Tests\Controller;
 
 use App\Entity\Task;
 use App\Repository\TaskRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\KernelBrowser;
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
+use Symfony\Component\Routing\Annotation\Route;
 
 class TaskControllerTest extends WebTestCase
 {
@@ -42,16 +43,14 @@ class TaskControllerTest extends WebTestCase
     {
         $originalNumObjectsInRepository = count($this->repository->findAll());
 
-        $this->markTestIncomplete();
-        $this->client->request('GET', sprintf('%stask_create', $this->path));
+        //$this->markTestIncomplete();
+        $this->client->request('GET', sprintf('%screate', $this->path));
 
         self::assertResponseStatusCodeSame(200);
 
-        $this->client->submitForm('Save', [
-            'task[createdAt]' => 'Testing',
+        $this->client->submitForm('Ajouter', [
             'task[title]' => 'Testing',
             'task[content]' => 'Testing',
-            'task[isDone]' => 'Testing',
         ]);
 
         self::assertResponseRedirects('/tasks/');
@@ -80,35 +79,34 @@ class TaskControllerTest extends WebTestCase
     }*/
 
     public function testEdit(): void
-    {
-        $this->markTestIncomplete();
-        $fixture = new Task();
-        $fixture->setCreatedAt('My Title');
-        $fixture->setTitle('My Title');
-        $fixture->setContent('My Title');
-        $fixture->setIsDone('My Title');
+{
+    //$this->markTestIncomplete();
+    $fixture = new Task();
+    $fixture->setCreatedAt(new \DateTimeImmutable()); // Utilisez un objet DateTimeImmutable pour la création
+    $fixture->setTitle('My Title');
+    $fixture->setContent('My Title');
+    //$fixture->IsDone(true);
 
-        $this->manager->persist($fixture);
-        $this->manager->flush();
+    $this->manager->persist($fixture);
+    $this->manager->flush();
 
-        $this->client->request('GET', sprintf('%s%s/edit', $this->path, $fixture->getId()));
+    $this->client->request('GET', sprintf('%s%s/edit', $this->path, $fixture->getId()));
 
-        $this->client->submitForm('Update', [
-            'task[createdAt]' => 'Something New',
-            'task[title]' => 'Something New',
-            'task[content]' => 'Something New',
-            'task[isDone]' => 'Something New',
-        ]);
+    $this->client->submitForm('Modifier', [
+        'task[title]' => 'Something New',
+        'task[content]' => 'Something New',
+    ]);
 
-        self::assertResponseRedirects('/tasks/');
+    self::assertResponseRedirects('/tasks/');
 
-        $fixture = $this->repository->findAll();
+    $fixture = $this->repository->findAll();
 
-        self::assertSame('Something New', $fixture[0]->getCreatedAt());
-        self::assertSame('Something New', $fixture[0]->getTitle());
-        self::assertSame('Something New', $fixture[0]->getContent());
-        self::assertSame('Something New', $fixture[0]->getIsDone());
-    }
+    self::assertInstanceOf(\DateTimeImmutable::class, $fixture[0]->getCreatedAt()); // Vérifiez que c'est une instance de DateTimeImmutable
+    self::assertSame('Something New', $fixture[0]->getTitle());
+    self::assertSame('Something New', $fixture[0]->getContent());
+    //self::assertSame(true, $fixture[0]->IsDone()); // Utilisez la valeur attendue pour IsDone
+}
+
 
     public function testRemove(): void
     {
@@ -117,10 +115,10 @@ class TaskControllerTest extends WebTestCase
         $originalNumObjectsInRepository = count($this->repository->findAll());
 
         $fixture = new Task();
-        $fixture->setCreatedAt('My Title');
+        $fixture->setCreatedAt(new \DateTimeImmutable());
         $fixture->setTitle('My Title');
-        $fixture->setContent('My Title');
-        $fixture->setIsDone('My Title');
+        $fixture->setContent('My Content');
+        $fixture->IsDone(true);
 
         $this->manager->persist($fixture);
         $this->manager->flush();
@@ -128,7 +126,7 @@ class TaskControllerTest extends WebTestCase
         self::assertSame($originalNumObjectsInRepository + 1, count($this->repository->findAll()));
 
         $this->client->request('GET', sprintf('%s%s', $this->path, $fixture->getId()));
-        $this->client->submitForm('task_delete');
+        $this->client->submitForm('Supprimer');
 
         self::assertSame($originalNumObjectsInRepository, count($this->repository->findAll()));
         self::assertResponseRedirects('/tasks/');
