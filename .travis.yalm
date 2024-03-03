@@ -1,0 +1,10 @@
+language: php
+php:
+ - '8.1.0'
+script:
+  - composer install
+  - vendor/bin/phpunit
+before_script:
+  - bash <(curl -Ls https://coverage.codacy.com/get.sh) download
+after_success:
+  - bash <(curl -Ls https://coverage.codacy.com/get.sh)
