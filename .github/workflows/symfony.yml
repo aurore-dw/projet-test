@@ -44,8 +44,8 @@ jobs:
         mkdir -p data
         touch data/database.sqlite
     - name: Execute Migrations
-      php bin/console doctrine:migrations:migrate --env=test --no-interaction
+      run: php bin/console doctrine:migrations:migrate --env=test --no-interaction
     - name: Execute tests (Unit and Feature tests) via PHPUnit
       env:
-        DATABASE_URL: sqlite:///%kernel.project_dir%/data/database.sqlite
+        DATABASE_URL=mysql://root:@127.0.0.1:3306/projet-8-new?serverVersion=15&charset=utf8
       run: vendor/bin/phpunit
