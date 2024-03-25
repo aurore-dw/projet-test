@@ -1,0 +1,7 @@
+stages:
+  - test
+
+PHPUnit:
+  stage: test
+  script:
+    - phpunit --configuration phpunit.xml.dist
