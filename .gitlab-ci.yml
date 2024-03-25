@@ -4,4 +4,4 @@ stages:
 PHPUnit:
   stage: test
   script:
-    - phpunit --configuration phpunit.xml.dist
+    - phpunit --configuration phpunit.xml
